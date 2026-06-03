@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "xhs_reader": {
+      "command": "python3",
+      "args": [
+        "main.py"
+      ],
+      "env": {
+        "HUNYUAN_API_KEY": "sk-请在此处填入真实混元APIKey"
+      },
+      "autoApprove": []
+    }
+  }
+}
