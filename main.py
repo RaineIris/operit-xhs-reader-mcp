@@ -49,6 +49,15 @@ mcp = FastMCP("Xiaohongshu_Stealth_Reader")
 
 HUNYUAN_BASE_URL = "https://api.hunyuan.cloud.tencent.com/v1"
 
+SYSTEM_PROMPT = """你是一个图片内容提取助手。你的任务是根据图片类型，用最合适的格式输出内容。
+
+核心规则：
+1. 对话截图（聊天气泡界面）：你必须标注每条消息的发送方。右侧气泡=截图者本人，左侧气泡=对方。格式为"右(昵称)：内容"和"左(昵称)：内容"，每条消息一行，从上到下排列。如果能看到昵称就用昵称，看不到就只写"左""右"。
+2. 纯文字/文档图片：直接提取文字，保持原文格式。
+3. 其他图片：一句话描述画面。
+
+绝对不要添加分析、总结或解释。"""
+
 
 def get_api_key():
     """每次调用时动态读取环境变量"""
@@ -76,6 +85,10 @@ def describe_image(image_url: str) -> str:
             "model": "hunyuan-vision",
             "messages": [
                 {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT
+                },
+                {
                     "role": "user",
                     "content": [
                         {
@@ -84,12 +97,12 @@ def describe_image(image_url: str) -> str:
                         },
                         {
                             "type": "text",
-                            "text": "这是一篇小红书帖子中的图片。请直接提取并转录图片中的所有文字内容，保持原文顺序。如果有图表或配图，简要描述其内容（一句话即可）。不要添加分析、总结或额外解释。"
+                            "text": "请识别这张图片并按规则输出。如果是聊天截图，必须用'左(昵称)：xxx'和'右(昵称)：xxx'格式逐条标注每条消息的发送方。"
                         }
                     ]
                 }
             ],
-            "max_tokens": 1000
+            "max_tokens": 1500
         }
         r = requests.post(
             f"{HUNYUAN_BASE_URL}/chat/completions",
